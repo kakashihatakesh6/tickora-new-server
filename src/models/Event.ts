@@ -19,6 +19,12 @@ interface EventAttributes {
   totalSeats: number;
   availableSeats: number;
   imageURL: string;
+  ticketLevel?: string; // Optional for now
+  cast?: any;
+  crew?: any;
+  duration?: string;
+  language?: string;
+  rating?: number;
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date | null;
@@ -38,6 +44,11 @@ class Event extends Model<EventAttributes, EventCreationAttributes> implements E
   public totalSeats!: number;
   public availableSeats!: number;
   public imageURL!: string;
+  public cast!: any;
+  public crew!: any;
+  public duration!: string;
+  public language!: string;
+  public rating!: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   public readonly deletedAt!: Date | null;
@@ -88,6 +99,26 @@ Event.init(
     },
     imageURL: {
       type: DataTypes.STRING,
+      allowNull: true
+    },
+    cast: {
+      type: DataTypes.JSON,
+      allowNull: true
+    },
+    crew: {
+      type: DataTypes.JSON,
+      allowNull: true
+    },
+    duration: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    language: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    rating: {
+      type: DataTypes.FLOAT,
       allowNull: true
     },
     createdAt: {
