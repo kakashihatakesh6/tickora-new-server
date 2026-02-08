@@ -18,6 +18,11 @@ const transformEventToAPI = (event: any, occupiedSeats: string[] = []) => ({
   available_seats: event.availableSeats,
   image_url: event.imageURL,
   occupied_seats: occupiedSeats, // Add occupied seats
+  cast: event.cast,
+  crew: event.crew,
+  duration: event.duration,
+  language: event.language,
+  rating: event.rating,
   created_at: event.createdAt,
   updated_at: event.updatedAt
 });
