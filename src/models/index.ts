@@ -1,32 +1,30 @@
-import sequelize from '../config/database';
+// Export all models from a central location
 import User from './User';
-import Event from './Event';
+import Event, { EventType } from './Event';
+import Movie from './Movie';
+import MovieShow from './MovieShow';
+import Sport from './Sport';
 import Booking, { BookingStatus } from './Booking';
 import Ticket from './Ticket';
 
-// Define all associations here after all models are loaded
-// This prevents circular dependency issues
+// Define Associations
+Movie.hasMany(MovieShow, { foreignKey: 'movieId', as: 'shows' });
+MovieShow.belongsTo(Movie, { foreignKey: 'movieId', as: 'movie' });
 
-// User associations
 User.hasMany(Booking, { foreignKey: 'userId', as: 'bookings' });
-
-// Event associations
-Event.hasMany(Booking, { foreignKey: 'eventId', as: 'bookings' });
-
-// Booking associations
 Booking.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-Booking.belongsTo(Event, { foreignKey: 'eventId', as: 'event' });
+
 Booking.hasMany(Ticket, { foreignKey: 'bookingId', as: 'tickets' });
+Ticket.belongsTo(Booking, { foreignKey: 'bookingId', as: 'ticket' });
 
-// Ticket associations
-Ticket.belongsTo(Booking, { foreignKey: 'bookingId', as: 'booking' });
-
-export { User, Event, Booking, Ticket, BookingStatus, sequelize };
-
-export default {
-  User,
-  Event,
-  Booking,
-  Ticket,
-  sequelize
+export {
+    User,
+    Event,
+    EventType,
+    Movie,
+    MovieShow,
+    Sport,
+    Booking,
+    BookingStatus,
+    Ticket
 };

@@ -1,17 +1,11 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 
-export enum EventType {
-  MOVIE = 'MOVIE',
-  SPORT = 'SPORT',
-  CONCERT = 'CONCERT'
-}
-
-interface EventAttributes {
+export interface SportAttributes {
   id: number;
   title: string;
   description: string;
-  eventType: EventType;
+  category: string; // 'Cricket', 'Soccer', etc.
   city: string;
   venue: string;
   dateTime: Date;
@@ -19,27 +13,20 @@ interface EventAttributes {
   totalSeats: number;
   availableSeats: number;
   image_url: string;
-  ticketLevel?: string; // Optional for now
-  cast?: any;
-  crew?: any;
   duration?: string;
-  language?: string;
-  category?: string; // e.g. 'Cricket', 'Soccer', etc.
-  format?: string;
-  screenNumber?: string;
   rating?: number;
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date | null;
 }
 
-interface EventCreationAttributes extends Optional<EventAttributes, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'> {}
+interface SportCreationAttributes extends Optional<SportAttributes, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'> {}
 
-class Event extends Model<EventAttributes, EventCreationAttributes> implements EventAttributes {
+class Sport extends Model<SportAttributes, SportCreationAttributes> implements SportAttributes {
   public id!: number;
   public title!: string;
   public description!: string;
-  public eventType!: EventType;
+  public category!: string;
   public city!: string;
   public venue!: string;
   public dateTime!: Date;
@@ -47,20 +34,14 @@ class Event extends Model<EventAttributes, EventCreationAttributes> implements E
   public totalSeats!: number;
   public availableSeats!: number;
   public image_url!: string;
-  public cast!: any;
-  public crew!: any;
   public duration!: string;
-  public language!: string;
-  public category!: string;
-  public format!: string;
-  public screenNumber!: string;
   public rating!: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   public readonly deletedAt!: Date | null;
 }
 
-Event.init(
+Sport.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -75,8 +56,8 @@ Event.init(
       type: DataTypes.TEXT,
       allowNull: true
     },
-    eventType: {
-      type: DataTypes.ENUM('MOVIE', 'SPORT', 'CONCERT'),
+    category: {
+      type: DataTypes.STRING, // e.g., 'Cricket', 'Soccer'
       allowNull: false
     },
     city: {
@@ -107,35 +88,9 @@ Event.init(
       type: DataTypes.STRING,
       allowNull: true
     },
-    cast: {
-      type: DataTypes.JSON,
-      allowNull: true
-    },
-    crew: {
-      type: DataTypes.JSON,
-      allowNull: true
-    },
     duration: {
       type: DataTypes.STRING,
       allowNull: true
-    },
-    language: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    category: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    format: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: '2D'
-    },
-    screenNumber: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: 'AUDI 1'
     },
     rating: {
       type: DataTypes.FLOAT,
@@ -158,7 +113,7 @@ Event.init(
   },
   {
     sequelize,
-    tableName: 'events',
+    tableName: 'sports',
     paranoid: false,
     timestamps: true,
     indexes: [
@@ -166,10 +121,10 @@ Event.init(
         fields: ['city']
       },
       {
-        fields: ['eventType']
+        fields: ['category']
       }
     ]
   }
 );
 
-export default Event;
+export default Sport;

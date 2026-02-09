@@ -1,7 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 import type User from './User';
-import type Event from './Event';
 
 export enum BookingStatus {
   PENDING = 'PENDING',
@@ -10,12 +9,19 @@ export enum BookingStatus {
   FAILED = 'FAILED'
 }
 
+export enum BookingType {
+  MOVIE = 'MOVIE',
+  SPORT = 'SPORT',
+  EVENT = 'EVENT'
+}
+
 interface BookingAttributes {
   id: number;
   userId: number;
-  eventId: number;
+  eventId: number; // ID of Movie, Sport, or Event
+  bookingType: BookingType; // Discriminator
   seatCount: number;
-  seatNumbers: string[]; // Store specific seats e.g. ["A1", "B2"]
+  seatNumbers: string[]; 
   totalAmount: number;
   status: BookingStatus;
   razorpayOrderId: string;
@@ -30,6 +36,7 @@ class Booking extends Model<BookingAttributes, BookingCreationAttributes> implem
   public id!: number;
   public userId!: number;
   public eventId!: number;
+  public bookingType!: BookingType;
   public seatCount!: number;
   public seatNumbers!: string[];
   public totalAmount!: number;
@@ -41,7 +48,7 @@ class Booking extends Model<BookingAttributes, BookingCreationAttributes> implem
 
   // Associations
   public readonly user?: User;
-  public readonly event?: Event;
+  // Dynamic association handling will be needed in controllers/services
 }
 
 Booking.init(
@@ -61,11 +68,13 @@ Booking.init(
     },
     eventId: {
       type: DataTypes.INTEGER,
+      allowNull: false
+      // Removed foreign key constraint to 'events' table
+    },
+    bookingType: {
+      type: DataTypes.ENUM('MOVIE', 'SPORT', 'EVENT'),
       allowNull: false,
-      references: {
-        model: 'events',
-        key: 'id'
-      }
+      defaultValue: BookingType.EVENT
     },
     seatCount: {
       type: DataTypes.INTEGER,
@@ -110,7 +119,5 @@ Booking.init(
     timestamps: true
   }
 );
-
-// Associations are defined in models/index.ts
 
 export default Booking;

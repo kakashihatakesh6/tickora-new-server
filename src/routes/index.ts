@@ -1,6 +1,7 @@
 import { Router } from 'express';
+
+const router = Router();
 import { register, login, registerValidation, loginValidation } from '../controllers/authController';
-import { createEvent, getEvents, getEvent } from '../controllers/eventController';
 import {
   createBooking,
   verifyPayment,
@@ -10,25 +11,19 @@ import {
   verifyPaymentValidation
 } from '../controllers/bookingController';
 import { authMiddleware } from '../middleware/authMiddleware';
-
-const router = Router();
-
-// Health check
-router.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    message: 'Ticket Master API is running'
-  });
-});
-
-// Auth routes
-router.post('/auth/register', registerValidation, register);
-router.post('/auth/login', loginValidation, login);
-
 // Event routes
+import { getMovies, getMovie, getMovieShows, getMovieShow, getSports, getSport, getEvents, getEvent } from '../controllers/eventController';
+
+router.get('/movies', getMovies);
+router.get('/movies/:id', getMovie);
+router.get('/movies/:id/shows', getMovieShows);
+router.get('/movie-shows/:showId', getMovieShow);
+
+router.get('/sports', getSports);
+router.get('/sports/:id', getSport);
+
 router.get('/events', getEvents);
 router.get('/events/:id', getEvent);
-router.post('/events', createEvent); // Admin only (not enforced in this version)
 
 // Booking routes (authenticated)
 router.post('/bookings', authMiddleware, createBookingValidation, createBooking);
