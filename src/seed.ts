@@ -126,6 +126,34 @@ const seedEvents = async () => {
     // ========== SPORTS ==========
     const sportsData = [
       {
+        title: 'ENGLAND vs WEST INDIES - ICC MEN\'S T20 WC 2026',
+        category: 'Cricket',
+        city: 'Mumbai',
+        venue: 'Wankhede Stadium',
+        dateTime: new Date('2026-02-11T19:00:00'),
+        price: 5000,
+        totalSeats: 30000,
+        availableSeats: 30000,
+        description: 'England meet West Indies in a highly anticipated evening showdown promising back-and-forth action, explosive batting, and impactful bowling. Fans can anticipate dramatic overs, spectacular strategies and thrilling momentum swings. Fans can expect dramatic overs, spectacular strategies and thrilling momentum swings.',
+        image_url: 'https://wallpaperaccess.com/full/1887342.jpg',
+        duration: '3 hours',
+        rating: 4.9,
+        team1: 'ENGLAND',
+        team2: 'WEST INDIES',
+        team1_flag: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/be/Flag_of_England.svg/1200px-Flag_of_England.svg.png',
+        team2_flag: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/WestIndiesCricketFlagPre1999.svg/800px-WestIndiesCricketFlagPre1999.svg.png',
+        event_logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/2024_ICC_Men%27s_T20_World_Cup_logo.svg/800px-2024_ICC_Men%27s_T20_World_Cup_logo.svg.png',
+        important_info: 'I would like to be the FIRST to get information from the ICC such as ticket releases, announcements, prize draws, exclusive competitions and other offers.',
+        you_should_know: [
+          'Open your E-Ticket in "Your Orders" at home or at a strong network/Wi-Fi zone before heading to the venue. This ensures quick access even if network connectivity is weak at the venue.',
+          'Carry a valid government-issued photo ID along with your e-ticket for entry.',
+          'Gates open 2 hours before the match starts.',
+          'Outside food and beverages are not allowed inside the stadium.'
+        ],
+        terms_conditions: 'By booking this ticket, you agree to all terms and conditions set by the ICC and venue management.',
+        interested_count: 8300
+      },
+      {
         title: 'IPL Final: CSK vs MI',
         category: 'Cricket',
         city: 'Chennai',
@@ -134,10 +162,22 @@ const seedEvents = async () => {
         price: 2500,
         totalSeats: 30000,
         availableSeats: 30000,
-        description: 'The ultimate showdown between the two giants of Indian cricket.',
+        description: 'The ultimate showdown between the two giants of Indian cricket. Chennai Super Kings take on Mumbai Indians in the most anticipated IPL final of the season.',
         image_url: 'https://wallpaperaccess.com/full/1887342.jpg',
         duration: '4h',
-        rating: 4.7
+        rating: 4.7,
+        team1: 'CSK',
+        team2: 'MI',
+        team1_flag: 'https://documents.iplt20.com/ipl/CSK/logos/Logooutline/CSKoutline.png',
+        team2_flag: 'https://documents.iplt20.com/ipl/MI/Logos/Logooutline/MIoutline.png',
+        important_info: 'This is a high-demand match. Book your tickets early to avoid disappointment.',
+        you_should_know: [
+          'Carry a valid government-issued photo ID',
+          'Gates open 2 hours before match time',
+          'No outside food or beverages allowed'
+        ],
+        terms_conditions: 'Standard IPL terms and conditions apply.',
+        interested_count: 15200
       },
       {
         title: 'Premier League: Arsenal vs Liverpool',
@@ -148,10 +188,22 @@ const seedEvents = async () => {
         price: 8000,
         totalSeats: 60000,
         availableSeats: 60000,
-        description: 'English Premier League classic match.',
-        image_url: 'https://e0.365dm.com/23/04/1600x900/skysports-arsenal-liverpool-premier-league_6115886.jpg',
+        description: 'English Premier League classic match between two football giants.',
+        image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Arsenal_Liverpool_CL0708.jpg',
         duration: '2h',
-        rating: 4.6
+        rating: 4.6,
+        team1: 'Arsenal',
+        team2: 'Liverpool',
+        team1_flag: 'https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg',
+        team2_flag: 'https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg',
+        important_info: 'International fans must carry passport for entry verification.',
+        you_should_know: [
+          'Stadium tours available before match day',
+          'Merchandise stores open 3 hours before kickoff',
+          'Public transport recommended due to limited parking'
+        ],
+        terms_conditions: 'Premier League standard terms apply.',
+        interested_count: 12500
       },
       {
         title: 'Mumbai City FC vs Mohun Bagan',
@@ -165,7 +217,10 @@ const seedEvents = async () => {
         description: 'ISL intense match-up in the heart of Mumbai.',
         image_url: 'https://img.etimg.com/thumb/width-1200,height-900,imgsize-64300,resizemode-1,msid-81504505/news/sports/mumbai-city-fc-beat-atk-mohun-bagan-2-1-to-clinch-isl-winners-shield.jpg',
         duration: '2h',
-        rating: 4.5
+        rating: 4.5,
+        team1: 'Mumbai City FC',
+        team2: 'Mohun Bagan',
+        interested_count: 3400
       },
       {
         title: 'Pro Kabaddi League: U Mumba vs Jaipur Pink Panthers',
@@ -177,9 +232,12 @@ const seedEvents = async () => {
         totalSeats: 5000,
         availableSeats: 4800,
         description: 'Catch the panga live!',
-        image_url: 'https://images.news18.com/ibnlive/uploads/2022/11/pro-kabaddi-league-16677955513x2.jpg',
+        image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Pro-kabaddi-finals.jpg',
         duration: '1h 30m',
-        rating: 4.4
+        rating: 4.4,
+        team1: 'U Mumba',
+        team2: 'Jaipur Pink Panthers',
+        interested_count: 2100
       },
       {
         title: 'Tata Mumbai Marathon 2026',
@@ -191,9 +249,16 @@ const seedEvents = async () => {
         totalSeats: 50000,
         availableSeats: 10000,
         description: 'Join the run for the spirit of Mumbai.',
-        image_url: 'https://tatamumbaimarathon.procam.in/static-assets/waf-images/8e/58/01/16-9/7w2736b2jW.jpg',
+        image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Runners_during_Tata_Mumbai_Marathon%2C_2023_at_Worli_Sea_Link.jpg',
         duration: '6h',
-        rating: 4.8
+        rating: 4.8,
+        important_info: 'All participants must complete registration and health check-up before race day.',
+        you_should_know: [
+          'Registration closes 7 days before the event',
+          'Mandatory health certificate required',
+          'Hydration stations every 2km'
+        ],
+        interested_count: 25000
       },
       {
         title: 'Indian Grand Prix: MotoGP',
@@ -205,9 +270,16 @@ const seedEvents = async () => {
         totalSeats: 100000,
         availableSeats: 90000,
         description: 'Experience the thrill of speed at India\'s premier race track.',
-        image_url: 'https://bsmedia.business-standard.com/_media/bs/img/article/2023-09/22/full/1695384661-8843.jpg',
+        image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Buddh_International_Circuit_aerial.jpg',
         duration: '3h',
-        rating: 4.9
+        rating: 4.9,
+        important_info: 'Ear protection recommended. Loud noise levels expected.',
+        you_should_know: [
+          'Paddock access available with premium tickets',
+          'Free shuttle service from metro station',
+          'Food courts and merchandise stalls available'
+        ],
+        interested_count: 45000
       },
       {
         title: 'Wimbledon 2026 Screening',
@@ -219,9 +291,10 @@ const seedEvents = async () => {
         totalSeats: 200,
         availableSeats: 150,
         description: 'Live screening of the Wimbledon finals with food and drinks.',
-        image_url: 'https://www.wimbledon.com/images/ios/iphone_1242_2208/2023_gentlemens_singles_final_alcaraz_celebration_1_1689528657.jpg',
+        image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Right_side_shot_of_Centre_Court%2C_Wimbledon.jpg',
         duration: '4h',
-        rating: 4.3
+        rating: 4.3,
+        interested_count: 180
       }
     ];
 

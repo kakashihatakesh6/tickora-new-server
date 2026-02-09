@@ -15,6 +15,16 @@ export interface SportAttributes {
   image_url: string;
   duration?: string;
   rating?: number;
+  // Enhanced fields for detailed event pages
+  team1?: string;
+  team2?: string;
+  team1_flag?: string;
+  team2_flag?: string;
+  event_logo?: string;
+  important_info?: string;
+  you_should_know?: string[];
+  terms_conditions?: string;
+  interested_count?: number;
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date | null;
@@ -36,6 +46,15 @@ class Sport extends Model<SportAttributes, SportCreationAttributes> implements S
   public image_url!: string;
   public duration!: string;
   public rating!: number;
+  public team1?: string;
+  public team2?: string;
+  public team1_flag?: string;
+  public team2_flag?: string;
+  public event_logo?: string;
+  public important_info?: string;
+  public you_should_know?: string[];
+  public terms_conditions?: string;
+  public interested_count?: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   public readonly deletedAt!: Date | null;
@@ -95,6 +114,43 @@ Sport.init(
     rating: {
       type: DataTypes.FLOAT,
       allowNull: true
+    },
+    team1: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    team2: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    team1_flag: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    team2_flag: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    event_logo: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    important_info: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    you_should_know: {
+      type: DataTypes.JSON,
+      allowNull: true
+    },
+    terms_conditions: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    interested_count: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0
     },
     createdAt: {
       type: DataTypes.DATE,

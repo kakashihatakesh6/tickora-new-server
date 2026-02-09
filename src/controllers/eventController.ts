@@ -10,7 +10,12 @@ import { BookingStatus } from '../models/Booking';
 // Helpers to transform data
 // Helpers to transform data
 const transformMovie = (m: any) => ({ ...m.toJSON(), event_type: 'MOVIE', type: 'MOVIE' });
-const transformSport = (s: any) => ({ ...s.toJSON(), event_type: 'SPORT', type: 'SPORT' });
+const transformSport = (s: any) => ({ 
+    ...s.toJSON(), 
+    event_type: 'SPORT', 
+    type: 'SPORT',
+    date_time: s.dateTime 
+});
 const transformEvent = (e: any) => ({ ...e.toJSON(), event_type: 'EVENT', type: 'EVENT' }); // Concerts
 
 export const getMovies = async (req: Request, res: Response) => {
