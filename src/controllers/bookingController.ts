@@ -296,7 +296,7 @@ export const getBookingById = async (req: AuthRequest, res: Response): Promise<v
         { 
           model: Event, 
           as: 'event',
-          attributes: ['id', 'title', 'venue', 'city', 'dateTime', 'imageURL']
+          attributes: ['id', 'title', 'venue', 'city', 'dateTime', 'imageURL', 'language', 'format', 'screenNumber'] // Added new fields
         },
         {
           model: require('../models/Ticket').default,
@@ -312,15 +312,23 @@ export const getBookingById = async (req: AuthRequest, res: Response): Promise<v
 
     const ticket = (booking as any).tickets && (booking as any).tickets.length > 0 ? (booking as any).tickets[0] : null;
     
+    // Explicitly cast event to include new fields since Typescript model definition might lag in this context 
+    // without full restart/type regeneration, but runtime will work if keys exist in DB
+    const eventData = booking.event as any; 
+
     const transformedBooking = {
         id: booking.id,
         event: {
-          id: booking.event!.id,
-          title: booking.event!.title,
-          venue: booking.event!.venue,
-          city: booking.event!.city,
-          date_time: booking.event!.dateTime,
-          image_url: booking.event!.imageURL
+          id: eventData.id,
+          title: eventData.title,
+          venue: eventData.venue,
+          city: eventData.city,
+          date_time: eventData.dateTime,
+          image_url: eventData.imageURL,
+          language: eventData.language || 'Hindi',
+          format: eventData.format || '2D',
+          screen_number: eventData.screenNumber || 'AUDI 2',
+          ticket_level: 'CLASSIC' // Hardcoded for now or fetch if added to model
         },
         seat_count: booking.seatCount,
         seat_numbers: booking.seatNumbers,

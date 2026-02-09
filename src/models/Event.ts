@@ -24,6 +24,8 @@ interface EventAttributes {
   crew?: any;
   duration?: string;
   language?: string;
+  format?: string;
+  screenNumber?: string;
   rating?: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -48,6 +50,8 @@ class Event extends Model<EventAttributes, EventCreationAttributes> implements E
   public crew!: any;
   public duration!: string;
   public language!: string;
+  public format!: string;
+  public screenNumber!: string;
   public rating!: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -116,6 +120,16 @@ Event.init(
     language: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    format: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: '2D'
+    },
+    screenNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: 'AUDI 1'
     },
     rating: {
       type: DataTypes.FLOAT,
