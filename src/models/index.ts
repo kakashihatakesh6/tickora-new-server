@@ -1,7 +1,7 @@
 import sequelize from '../config/database';
 import User from './User';
 import Event from './Event';
-import Booking from './Booking';
+import Booking, { BookingStatus } from './Booking';
 import Ticket from './Ticket';
 
 // Define all associations here after all models are loaded
@@ -21,7 +21,7 @@ Booking.hasMany(Ticket, { foreignKey: 'bookingId', as: 'tickets' });
 // Ticket associations
 Ticket.belongsTo(Booking, { foreignKey: 'bookingId', as: 'booking' });
 
-export { User, Event, Booking, Ticket, sequelize };
+export { User, Event, Booking, Ticket, BookingStatus, sequelize };
 
 export default {
   User,
