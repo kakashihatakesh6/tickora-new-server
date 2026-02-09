@@ -283,3 +283,59 @@ export const getUserBookings = async (req: AuthRequest, res: Response): Promise<
     res.status(500).json({ error: error.message || 'Error fetching bookings' });
   }
 };
+
+export const getBookingById = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId!;
+    const bookingId = req.params.id;
+    console.log(`[getBookingById] Request for Booking ID: ${bookingId} by User ID: ${userId}`);
+
+    const booking = await Booking.findOne({
+      where: { id: bookingId, userId },
+      include: [
+        { 
+          model: Event, 
+          as: 'event',
+          attributes: ['id', 'title', 'venue', 'city', 'dateTime', 'imageURL']
+        },
+        {
+          model: require('../models/Ticket').default,
+          as: 'tickets'
+        }
+      ]
+    });
+
+    if (!booking) {
+      res.status(404).json({ error: 'Booking not found' });
+      return;
+    }
+
+    const ticket = (booking as any).tickets && (booking as any).tickets.length > 0 ? (booking as any).tickets[0] : null;
+    
+    const transformedBooking = {
+        id: booking.id,
+        event: {
+          id: booking.event!.id,
+          title: booking.event!.title,
+          venue: booking.event!.venue,
+          city: booking.event!.city,
+          date_time: booking.event!.dateTime,
+          image_url: booking.event!.imageURL
+        },
+        seat_count: booking.seatCount,
+        seat_numbers: booking.seatNumbers,
+        total_amount: booking.totalAmount,
+        status: booking.status,
+        created_at: booking.createdAt,
+        ticket: ticket ? {
+            id: ticket.id,
+            unique_code: ticket.uniqueCode,
+            details: ticket.details
+        } : null
+    };
+
+    res.status(200).json(transformedBooking);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || 'Error fetching booking' });
+  }
+};

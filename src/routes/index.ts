@@ -5,6 +5,7 @@ import {
   createBooking,
   verifyPayment,
   getUserBookings,
+  getBookingById,
   createBookingValidation,
   verifyPaymentValidation
 } from '../controllers/bookingController';
@@ -33,5 +34,6 @@ router.post('/events', createEvent); // Admin only (not enforced in this version
 router.post('/bookings', authMiddleware, createBookingValidation, createBooking);
 router.post('/bookings/verify', authMiddleware, verifyPaymentValidation, verifyPayment);
 router.get('/bookings/my', authMiddleware, getUserBookings);
+router.get('/bookings/:id', authMiddleware, getBookingById); // Add specific ID route
 
 export default router;
