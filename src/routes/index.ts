@@ -14,6 +14,10 @@ import { authMiddleware } from '../middleware/authMiddleware';
 // Event routes
 import { getMovies, getMovie, getMovieShows, getMovieShow, getSports, getSport, getEvents, getEvent } from '../controllers/eventController';
 
+// Auth routes
+router.post('/auth/register', registerValidation, register);
+router.post('/auth/login', loginValidation, login);
+
 router.get('/movies', getMovies);
 router.get('/movies/:id', getMovie);
 router.get('/movies/:id/shows', getMovieShows);
