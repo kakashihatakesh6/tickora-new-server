@@ -8,16 +8,19 @@ import {
   getUserBookings,
   getBookingById,
   createBookingValidation,
-  verifyPaymentValidation
+  verifyPaymentValidation,
+  lockSeat,
+  unlockSeat
 } from '../controllers/bookingController';
 import { authMiddleware } from '../middleware/authMiddleware';
 // Event routes
-import { getMovies, getMovie, getMovieShows, getMovieShow, getSports, getSport, getEvents, getEvent } from '../controllers/eventController';
+import { getMovies, getMovie, getMovieShows, getMovieShow, getSports, getSport, getEvents, getEvent, searchAll } from '../controllers/eventController';
 
 // Auth routes
 router.post('/auth/register', registerValidation, register);
 router.post('/auth/login', loginValidation, login);
 
+router.get('/search', searchAll);
 router.get('/movies', getMovies);
 router.get('/movies/:id', getMovie);
 router.get('/movies/:id/shows', getMovieShows);
@@ -31,6 +34,8 @@ router.get('/events/:id', getEvent);
 
 // Booking routes (authenticated)
 router.post('/bookings', authMiddleware, createBookingValidation, createBooking);
+router.post('/bookings/lock', authMiddleware, lockSeat);
+router.post('/bookings/unlock', authMiddleware, unlockSeat);
 router.post('/bookings/verify', authMiddleware, verifyPaymentValidation, verifyPayment);
 router.get('/bookings/my', authMiddleware, getUserBookings);
 router.get('/bookings/:id', authMiddleware, getBookingById); // Add specific ID route

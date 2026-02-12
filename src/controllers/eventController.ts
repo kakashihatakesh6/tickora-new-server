@@ -10,18 +10,25 @@ import { BookingStatus } from '../models/Booking';
 // Helpers to transform data
 // Helpers to transform data
 const transformMovie = (m: any) => ({ ...m.toJSON(), event_type: 'MOVIE', type: 'MOVIE' });
-const transformSport = (s: any) => ({ 
-    ...s.toJSON(), 
-    event_type: 'SPORT', 
+const transformSport = (s: any) => ({
+    ...s.toJSON(),
+    event_type: 'SPORT',
     type: 'SPORT',
-    date_time: s.dateTime 
+    date_time: s.dateTime
 });
 const transformEvent = (e: any) => ({ ...e.toJSON(), event_type: 'EVENT', type: 'EVENT' }); // Concerts
 
 export const getMovies = async (req: Request, res: Response) => {
     try {
+        const { q } = req.query;
+        const where: any = {};
+
+        if (q) {
+            where.title = { [Op.iLike]: `%${q}%` };
+        }
+
         // Return unique movies only (no duplicates)
-        const movies = await Movie.findAll();
+        const movies = await Movie.findAll({ where });
         res.json(movies.map(transformMovie));
     } catch (error) {
         res.status(500).json({ error: 'Error fetching movies' });
@@ -33,7 +40,7 @@ export const getMovie = async (req: Request, res: Response) => {
         const { id } = req.params;
         const movie = await Movie.findByPk(id);
         if (!movie) return res.status(404).json({ error: 'Movie not found' });
-        
+
         // Return movie details without show-specific data
         return res.json(transformMovie(movie));
     } catch (error) {
@@ -45,17 +52,17 @@ export const getMovie = async (req: Request, res: Response) => {
 export const getMovieShows = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        
+
         // Verify movie exists
         const movie = await Movie.findByPk(id);
         if (!movie) return res.status(404).json({ error: 'Movie not found' });
-        
+
         // Fetch all shows for this movie
         const shows = await MovieShow.findAll({
             where: { movieId: id },
             order: [['dateTime', 'ASC']]
         });
-        
+
         return res.json(shows);
     } catch (error) {
         return res.status(500).json({ error: 'Error fetching movie shows' });
@@ -72,9 +79,9 @@ export const getMovieShow = async (req: Request, res: Response) => {
                 as: 'movie'
             }]
         });
-        
+
         if (!show) return res.status(404).json({ error: 'Show not found' });
-        
+
         // Fetch occupied seats for this specific show
         const bookings = await Booking.findAll({
             where: {
@@ -84,10 +91,10 @@ export const getMovieShow = async (req: Request, res: Response) => {
             },
             attributes: ['seatNumbers']
         });
-        
+
         const occupiedSeats = new Set<string>();
         bookings.forEach(b => b.seatNumbers.forEach(s => occupiedSeats.add(s)));
-        
+
         const showData = show.toJSON() as any;
         const movieData = showData.movie || {};
 
@@ -114,7 +121,14 @@ export const getMovieShow = async (req: Request, res: Response) => {
 
 export const getSports = async (req: Request, res: Response) => {
     try {
-        const sports = await Sport.findAll();
+        const { q } = req.query;
+        const where: any = {};
+
+        if (q) {
+            where.title = { [Op.iLike]: `%${q}%` };
+        }
+
+        const sports = await Sport.findAll({ where });
         res.json(sports.map(transformSport));
     } catch (error) {
         res.status(500).json({ error: 'Error fetching sports' });
@@ -147,8 +161,15 @@ export const getSport = async (req: Request, res: Response) => {
 
 export const getEvents = async (req: Request, res: Response) => {
     try {
-        const events = await Event.findAll();
-         res.json(events.map(transformEvent));
+        const { q } = req.query;
+        const where: any = {};
+
+        if (q) {
+            where.title = { [Op.iLike]: `%${q}%` };
+        }
+
+        const events = await Event.findAll({ where });
+        res.json(events.map(transformEvent));
     } catch (error) {
         res.status(500).json({ error: 'Error fetching events' });
     }
@@ -175,6 +196,33 @@ export const getEvent = async (req: Request, res: Response) => {
         return res.json({ ...transformEvent(event), occupied_seats: Array.from(occupiedSeats) });
     } catch (error) {
         return res.status(500).json({ error: 'Error fetching event' });
+    }
+};
+
+export const searchAll = async (req: Request, res: Response) => {
+    try {
+        const { q } = req.query;
+        if (!q) return res.json([]);
+
+        const where = { title: { [Op.iLike]: `%${q}%` } };
+
+        const [movies, sports, events] = await Promise.all([
+            Movie.findAll({ where }),
+            Sport.findAll({ where }),
+            Event.findAll({ where })
+        ]);
+
+        const results = [
+            ...movies.map(transformMovie),
+            ...sports.map(transformSport),
+            ...events.map(transformEvent)
+        ];
+
+        // Sort by title or relevance if needed, for now just merged
+        return res.json(results);
+    } catch (error) {
+        console.error('Search error:', error);
+        return res.status(500).json({ error: 'Error during search' });
     }
 };
 

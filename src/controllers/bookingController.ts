@@ -7,6 +7,7 @@ import { createRazorpayOrder, verifyPaymentSignature } from '../services/razorpa
 import { generateTicket } from '../services/ticketService';
 import sequelize from '../config/database';
 
+import { acquireLock, releaseLock, checkLock, extendLock } from '../services/lockService';
 // ... imports
 
 export const createBookingValidation = [
@@ -32,7 +33,7 @@ export const createBooking = async (req: AuthRequest, res: Response): Promise<vo
     }
 
     const userId = req.userId!;
-    const { event_id, seat_numbers, bookingType } = req.body;
+    const { event_id, seat_numbers, bookingType, price: providedPrice } = req.body;
     const seat_count = seat_numbers.length;
 
     // Validate event exists based on bookingType
@@ -42,17 +43,18 @@ export const createBooking = async (req: AuthRequest, res: Response): Promise<vo
 
     // For MOVIE bookings, event_id is actually the showId (MovieShow ID)
     if (bookingType === 'MOVIE') {
-        eventModel = require('../models/MovieShow').default;
+      eventModel = require('../models/MovieShow').default;
     } else if (bookingType === 'SPORT') {
-        eventModel = require('../models/Sport').default;
+      eventModel = require('../models/Sport').default;
     } else { // Default to 'EVENT'
-        eventModel = require('../models/Event').default;
+      eventModel = require('../models/Event').default;
     }
 
     const eventCheck = await eventModel.findByPk(event_id);
     if (eventCheck) {
-        eventExists = true;
-        price = eventCheck.price;
+      eventExists = true;
+      // Logic: Use providedPrice if bookingType is SPORT, otherwise fallback to event default price
+      price = (bookingType === 'SPORT' && providedPrice) ? Number(providedPrice) : eventCheck.price;
     }
 
     if (!eventExists) {
@@ -101,6 +103,21 @@ export const createBooking = async (req: AuthRequest, res: Response): Promise<vo
       for (const seat of seat_numbers) {
         if (occupiedSeats.has(seat)) {
           throw new Error(`Seat ${seat} is already booked.`);
+        }
+
+        // Check if the current user holds the lock for this seat
+        const lockKey = `lock:seat:${event_id}:${seat}`;
+        const lockValue = await checkLock(lockKey);
+
+        if (!lockValue) {
+          // Try to acquire lock now in case it expired or wasn't set (e.g. direct API call)
+          // We set a short TTL or standard TTL.
+          const acquired = await acquireLock(lockKey, userId.toString(), 300);
+          if (!acquired) {
+            throw new Error(`Seat ${seat} is unavailable (locked by another user/system).`);
+          }
+        } else if (lockValue !== userId.toString()) {
+          throw new Error(`Seat ${seat} is currently locked by another user.`);
         }
       }
 
@@ -194,9 +211,9 @@ export const verifyPayment = async (req: AuthRequest, res: Response): Promise<vo
       }
 
       if (event.availableSeats < booking.seatCount) {
-         booking.status = BookingStatus.FAILED;
-         await booking.save({ transaction: t });
-         throw new Error('Seats no longer available. Refund initiated.');
+        booking.status = BookingStatus.FAILED;
+        await booking.save({ transaction: t });
+        throw new Error('Seats no longer available. Refund initiated.');
       }
 
       // 6. Update Event
@@ -211,22 +228,22 @@ export const verifyPayment = async (req: AuthRequest, res: Response): Promise<vo
 
     // 8. Fetch details for response (outside transaction)
     fullBooking = await Booking.findByPk(booking_id, {
-        include: [{ model: User, as: 'user' }]
+      include: [{ model: User, as: 'user' }]
     });
 
     if (!fullBooking) throw new Error('Could not fetch confirmed booking details');
-    
+
     // Manually fetch event details for ticket generation if needed, 
     // but generateTicket service might need update too if it relies on fullBooking.event
     // For now, let's assume generateTicket handles it or we pass event data?
     // Actually generateTicket probably expects booking.event.
     // Let's attach it.
-    
+
     let EventModel: any;
     if (fullBooking.bookingType === 'MOVIE') EventModel = require('../models/MovieShow').default;
     else if (fullBooking.bookingType === 'SPORT') EventModel = require('../models/Sport').default;
     else EventModel = require('../models/Event').default;
-    
+
     const eventDetails = await EventModel.findByPk(fullBooking.eventId);
     (fullBooking as any).event = eventDetails; // Manually attach
 
@@ -265,41 +282,41 @@ export const getUserBookings = async (req: AuthRequest, res: Response): Promise<
     });
 
     const transformedBookings = [];
-    
-    for (const booking of bookings) {
-        let eventDetails: any = null;
-        let Model: any = null;
-        
-        if (booking.bookingType === 'MOVIE') Model = require('../models/MovieShow').default;
-        else if (booking.bookingType === 'SPORT') Model = require('../models/Sport').default;
-        else Model = require('../models/Event').default;
-        
-        eventDetails = await Model.findByPk(booking.eventId);
 
-        if (eventDetails) {
-             const ticket = (booking as any).tickets && (booking as any).tickets.length > 0 ? (booking as any).tickets[0] : null;
-             transformedBookings.push({
-                id: booking.id,
-                event: {
-                  id: eventDetails.id,
-                  title: eventDetails.title,
-                  venue: eventDetails.venue,
-                  city: eventDetails.city,
-                  date_time: eventDetails.dateTime,
-                  image_url: eventDetails.imageURL
-                },
-                seat_count: booking.seatCount,
-                seat_numbers: booking.seatNumbers,
-                total_amount: booking.totalAmount,
-                status: booking.status,
-                created_at: booking.createdAt,
-                ticket: ticket ? {
-                    id: ticket.id,
-                    unique_code: ticket.uniqueCode,
-                    details: ticket.details
-                } : null
-             });
-        }
+    for (const booking of bookings) {
+      let eventDetails: any = null;
+      let Model: any = null;
+
+      if (booking.bookingType === 'MOVIE') Model = require('../models/MovieShow').default;
+      else if (booking.bookingType === 'SPORT') Model = require('../models/Sport').default;
+      else Model = require('../models/Event').default;
+
+      eventDetails = await Model.findByPk(booking.eventId);
+
+      if (eventDetails) {
+        const ticket = (booking as any).tickets && (booking as any).tickets.length > 0 ? (booking as any).tickets[0] : null;
+        transformedBookings.push({
+          id: booking.id,
+          event: {
+            id: eventDetails.id,
+            title: eventDetails.title,
+            venue: eventDetails.venue,
+            city: eventDetails.city,
+            date_time: eventDetails.dateTime,
+            image_url: eventDetails.imageURL
+          },
+          seat_count: booking.seatCount,
+          seat_numbers: booking.seatNumbers,
+          total_amount: booking.totalAmount,
+          status: booking.status,
+          created_at: booking.createdAt,
+          ticket: ticket ? {
+            id: ticket.id,
+            unique_code: ticket.uniqueCode,
+            details: ticket.details
+          } : null
+        });
+      }
     }
 
     res.status(200).json(transformedBookings);
@@ -338,43 +355,102 @@ export const getBookingById = async (req: AuthRequest, res: Response): Promise<v
     const eventDetails = await EventModel.findByPk(booking.eventId);
 
     if (!eventDetails) {
-         res.status(404).json({ error: 'Associated event not found' });
-         return;
+      res.status(404).json({ error: 'Associated event not found' });
+      return;
     }
 
     const ticket = (booking as any).tickets && (booking as any).tickets.length > 0 ? (booking as any).tickets[0] : null;
-    
+
     // Helper to get consistent fields
     const getField = (f: string) => (eventDetails as any)[f];
 
     const transformedBooking = {
-        id: booking.id,
-        event: {
-          id: eventDetails.id,
-          title: eventDetails.title,
-          venue: eventDetails.venue,
-          city: eventDetails.city,
-          date_time: eventDetails.dateTime,
-          image_url: eventDetails.imageURL,
-          language: getField('language'),
-          format: getField('format'),
-          screen_number: getField('screenNumber'),
-          ticket_level: 'STANDARD'
-        },
-        seat_count: booking.seatCount,
-        seat_numbers: booking.seatNumbers,
-        total_amount: booking.totalAmount,
-        status: booking.status,
-        created_at: booking.createdAt,
-        ticket: ticket ? {
-            id: ticket.id,
-            unique_code: ticket.uniqueCode,
-            details: ticket.details
-        } : null
+      id: booking.id,
+      event: {
+        id: eventDetails.id,
+        title: eventDetails.title,
+        venue: eventDetails.venue,
+        city: eventDetails.city,
+        date_time: eventDetails.dateTime,
+        image_url: eventDetails.imageURL,
+        language: getField('language'),
+        format: getField('format'),
+        screen_number: getField('screenNumber'),
+        ticket_level: 'STANDARD'
+      },
+      seat_count: booking.seatCount,
+      seat_numbers: booking.seatNumbers,
+      total_amount: booking.totalAmount,
+      status: booking.status,
+      created_at: booking.createdAt,
+      ticket: ticket ? {
+        id: ticket.id,
+        unique_code: ticket.uniqueCode,
+        details: ticket.details
+      } : null
     };
 
     res.status(200).json(transformedBooking);
   } catch (error: any) {
     res.status(500).json({ error: error.message || 'Error fetching booking' });
+  }
+};
+
+export const lockSeat = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId!;
+    const { eventId, seatId, bookingType } = req.body;
+
+    if (!eventId || !seatId) {
+      res.status(400).json({ error: 'eventId and seatId are required' });
+      return;
+    }
+
+    const lockKey = `lock:seat:${eventId}:${seatId}`;
+    const lockedBy = await checkLock(lockKey);
+
+    if (lockedBy && lockedBy !== userId.toString()) {
+      res.status(409).json({ error: 'Seat is currently locked by another user', lockedBy: 'other' });
+      return;
+    }
+
+    if (lockedBy === userId.toString()) {
+      // Extend lock
+      await extendLock(lockKey, userId.toString());
+      res.status(200).json({ message: 'Lock extended', status: 'locked' });
+      return;
+    }
+
+    // Try to acquire lock
+    const acquired = await acquireLock(lockKey, userId.toString());
+
+    if (acquired) {
+      res.status(200).json({ message: 'Seat locked successfully', status: 'locked' });
+    } else {
+      res.status(409).json({ error: 'Could not acquire lock', lockedBy: 'unknown' });
+    }
+
+  } catch (error: any) {
+    console.error('Lock Seat Error:', error);
+    res.status(500).json({ error: error.message || 'Error locking seat' });
+  }
+};
+
+export const unlockSeat = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId!;
+    const { eventId, seatId } = req.body;
+
+    const lockKey = `lock:seat:${eventId}:${seatId}`;
+    const released = await releaseLock(lockKey, userId.toString());
+
+    if (released) {
+      res.status(200).json({ message: 'Seat unlocked successfully' });
+    } else {
+      res.status(400).json({ error: 'Could not unlock seat (maybe not locked by you)' });
+    }
+  } catch (error: any) {
+    console.error('Unlock Seat Error:', error);
+    res.status(500).json({ error: error.message || 'Error unlocking seat' });
   }
 };
