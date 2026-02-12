@@ -20,17 +20,32 @@ const transformEvent = (e: any) => ({ ...e.toJSON(), event_type: 'EVENT', type: 
 
 export const getMovies = async (req: Request, res: Response) => {
     try {
-        const { q } = req.query;
+        const { q, city } = req.query;
         const where: any = {};
+        const showWhere: any = {};
 
         if (q) {
             where.title = { [Op.iLike]: `%${q}%` };
         }
 
-        // Return unique movies only (no duplicates)
-        const movies = await Movie.findAll({ where });
+        if (city) {
+            showWhere.city = city;
+        }
+
+        // Return movies that have shows in the selected city (if city provided)
+        const movies = await Movie.findAll({
+            where,
+            include: city ? [{
+                model: MovieShow,
+                as: 'shows',
+                where: showWhere,
+                required: true // INNER JOIN to filter movies by city
+            }] : []
+        });
+
         res.json(movies.map(transformMovie));
     } catch (error) {
+        console.error('Error fetching movies:', error);
         res.status(500).json({ error: 'Error fetching movies' });
     }
 };
@@ -121,11 +136,15 @@ export const getMovieShow = async (req: Request, res: Response) => {
 
 export const getSports = async (req: Request, res: Response) => {
     try {
-        const { q } = req.query;
+        const { q, city } = req.query;
         const where: any = {};
 
         if (q) {
             where.title = { [Op.iLike]: `%${q}%` };
+        }
+
+        if (city) {
+            where.city = city;
         }
 
         const sports = await Sport.findAll({ where });
@@ -161,11 +180,15 @@ export const getSport = async (req: Request, res: Response) => {
 
 export const getEvents = async (req: Request, res: Response) => {
     try {
-        const { q } = req.query;
+        const { q, city } = req.query;
         const where: any = {};
 
         if (q) {
             where.title = { [Op.iLike]: `%${q}%` };
+        }
+
+        if (city) {
+            where.city = city;
         }
 
         const events = await Event.findAll({ where });
@@ -201,15 +224,24 @@ export const getEvent = async (req: Request, res: Response) => {
 
 export const searchAll = async (req: Request, res: Response) => {
     try {
-        const { q } = req.query;
+        const { q, city } = req.query;
         if (!q) return res.json([]);
 
         const where = { title: { [Op.iLike]: `%${q}%` } };
+        const cityWhere = city ? { city } : {};
 
         const [movies, sports, events] = await Promise.all([
-            Movie.findAll({ where }),
-            Sport.findAll({ where }),
-            Event.findAll({ where })
+            Movie.findAll({
+                where: where as any,
+                include: city ? [{
+                    model: MovieShow,
+                    as: 'shows',
+                    where: cityWhere as any,
+                    required: true
+                }] : []
+            }),
+            Sport.findAll({ where: { ...where, ...cityWhere } as any }),
+            Event.findAll({ where: { ...where, ...cityWhere } as any })
         ]);
 
         const results = [
@@ -218,7 +250,6 @@ export const searchAll = async (req: Request, res: Response) => {
             ...events.map(transformEvent)
         ];
 
-        // Sort by title or relevance if needed, for now just merged
         return res.json(results);
     } catch (error) {
         console.error('Search error:', error);

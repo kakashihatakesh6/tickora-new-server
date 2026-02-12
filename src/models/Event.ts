@@ -4,7 +4,8 @@ import sequelize from '../config/database';
 export enum EventType {
   MOVIE = 'MOVIE',
   SPORT = 'SPORT',
-  CONCERT = 'CONCERT'
+  CONCERT = 'CONCERT',
+  PLAY = 'PLAY'
 }
 
 interface EventAttributes {
@@ -33,7 +34,7 @@ interface EventAttributes {
   deletedAt?: Date | null;
 }
 
-interface EventCreationAttributes extends Optional<EventAttributes, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'> {}
+interface EventCreationAttributes extends Optional<EventAttributes, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'> { }
 
 class Event extends Model<EventAttributes, EventCreationAttributes> implements EventAttributes {
   public id!: number;
@@ -76,7 +77,7 @@ Event.init(
       allowNull: true
     },
     eventType: {
-      type: DataTypes.ENUM('MOVIE', 'SPORT', 'CONCERT'),
+      type: DataTypes.ENUM('MOVIE', 'SPORT', 'CONCERT', 'PLAY'),
       allowNull: false
     },
     city: {
