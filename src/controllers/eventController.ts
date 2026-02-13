@@ -102,7 +102,13 @@ export const getMovieShow = async (req: Request, res: Response) => {
             where: {
                 eventId: showId,
                 bookingType: 'MOVIE',
-                status: { [Op.in]: [BookingStatus.CONFIRMED, BookingStatus.PENDING] }
+                [Op.or]: [
+                    { status: BookingStatus.CONFIRMED },
+                    {
+                        status: BookingStatus.PENDING,
+                        createdAt: { [Op.gt]: new Date(Date.now() - 8 * 60 * 1000) }
+                    }
+                ]
             },
             attributes: ['seatNumbers']
         });
@@ -164,7 +170,13 @@ export const getSport = async (req: Request, res: Response) => {
             where: {
                 eventId: id,
                 bookingType: 'SPORT',
-                status: { [Op.in]: [BookingStatus.CONFIRMED, BookingStatus.PENDING] }
+                [Op.or]: [
+                    { status: BookingStatus.CONFIRMED },
+                    {
+                        status: BookingStatus.PENDING,
+                        createdAt: { [Op.gt]: new Date(Date.now() - 8 * 60 * 1000) }
+                    }
+                ]
             },
             attributes: ['seatNumbers']
         });
@@ -208,7 +220,13 @@ export const getEvent = async (req: Request, res: Response) => {
             where: {
                 eventId: id,
                 bookingType: 'EVENT',
-                status: { [Op.in]: [BookingStatus.CONFIRMED, BookingStatus.PENDING] }
+                [Op.or]: [
+                    { status: BookingStatus.CONFIRMED },
+                    {
+                        status: BookingStatus.PENDING,
+                        createdAt: { [Op.gt]: new Date(Date.now() - 8 * 60 * 1000) }
+                    }
+                ]
             },
             attributes: ['seatNumbers']
         });

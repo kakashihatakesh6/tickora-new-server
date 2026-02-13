@@ -1,6 +1,6 @@
 import redis from '../config/redis';
 
-const LOCK_TTL = 300; // 5 minutes in seconds
+const LOCK_TTL = 480; // 8 minutes in seconds
 
 export const acquireLock = async (key: string, value: string, ttl: number = LOCK_TTL): Promise<boolean> => {
     try {
