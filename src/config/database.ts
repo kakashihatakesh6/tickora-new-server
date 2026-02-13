@@ -11,7 +11,7 @@ const dbConfig = {
   username: process.env.DB_USER || process.env.PGUSER || 'postgres',
   password: process.env.DB_PASSWORD || process.env.PGPASSWORD || '',
   dialect: 'postgres' as const,
-  logging: process.env.NODE_ENV === 'production' ? false : console.log,
+  logging: false,
   pool: {
     max: 5,
     min: 0,
