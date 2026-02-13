@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
+import pg from 'pg';
 
 dotenv.config();
 
@@ -28,10 +29,14 @@ const dbConfig = {
 const sequelize = process.env.DATABASE_URL
   ? new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
+    dialectModule: pg,
     logging: dbConfig.logging,
     dialectOptions: dbConfig.dialectOptions
   })
-  : new Sequelize(dbConfig);
+  : new Sequelize({
+    ...dbConfig,
+    dialectModule: pg
+  });
 
 export const connectDatabase = async (): Promise<void> => {
   try {
