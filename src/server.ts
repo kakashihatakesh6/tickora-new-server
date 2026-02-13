@@ -42,3 +42,4 @@ startServer();
 
 // Export for Vercel
 export { startServer };
+export default app;
