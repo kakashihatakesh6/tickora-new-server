@@ -7,6 +7,5 @@ export default {
     '^.+\\.(ts|tsx)$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  setupFilesAfterEnv: ['./src/tests/setup.ts'],
-  testTimeout: 20000 
+  testTimeout: 20000
 };

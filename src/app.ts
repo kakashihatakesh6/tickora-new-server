@@ -24,6 +24,11 @@ app.use(cors(corsOptions));
 // Logger middleware
 app.use(loggerMiddleware);
 
+// Health check
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'OK', message: 'Server is healthy' });
+});
+
 // Routes
 app.use('/api/v1', routes); // Adjusted to match frontend expectation /api/v1/auth/register
 
