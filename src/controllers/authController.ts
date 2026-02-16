@@ -11,8 +11,8 @@ export const registerValidation = [
 ];
 
 export const loginValidation = [
-  body('email').isEmail().withMessage('Valid email is required'),
-  body('password').notEmpty().withMessage('Password is required')
+  body('email').trim().isEmail().normalizeEmail().withMessage('Valid email is required'),
+  body('password').trim().notEmpty().withMessage('Password is required')
 ];
 
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -63,7 +63,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     // Access password directly - it should be available in the model instance
     const userPassword = user.password;
-    
+
     if (!userPassword) {
       console.error('Password field is missing from user object');
       res.status(500).json({ error: 'Internal server error' });
