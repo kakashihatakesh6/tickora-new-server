@@ -34,6 +34,29 @@ router.post('/auth/forgot-password', forgotPasswordValidation, forgotPassword);
 router.post('/auth/verify-otp', verifyOtpValidation, verifyOtp);
 router.post('/auth/reset-password', resetPasswordValidation, resetPassword);
 
+import { getMe } from '../controllers/authController';
+router.get('/auth/me', authMiddleware, getMe);
+
+// OAuth routes
+import passport from 'passport';
+import { oauthCallback } from '../controllers/authController';
+
+// Google
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login', session: false }),
+  oauthCallback
+);
+
+// GitHub
+router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
+router.get(
+  '/auth/github/callback',
+  passport.authenticate('github', { failureRedirect: '/login', session: false }),
+  oauthCallback
+);
+
 router.get('/search', searchAll);
 router.get('/movies', getMovies);
 router.get('/movies/:id', getMovie);

@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import session from 'express-session';
+import passport from './config/passport';
 import routes from './routes';
 import { loggerMiddleware } from './middleware/logger';
 
@@ -23,6 +25,23 @@ app.use(cors(corsOptions));
 
 // Logger middleware
 app.use(loggerMiddleware);
+
+// Session middleware
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  })
+);
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Health check
 app.get('/', (req, res) => {

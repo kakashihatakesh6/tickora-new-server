@@ -223,3 +223,42 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const oauthCallback = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = req.user as any;
+
+    if (!user) {
+      res.redirect('http://localhost:3000/login?error=AuthenticationFailed');
+      return;
+    }
+
+    const token = generateToken(user.id);
+    console.log('OAuth Login Successful for user:', user.email);
+
+    // Redirect to frontend with token
+    res.redirect(`http://localhost:3000/auth/callback?token=${token}`);
+  } catch (error) {
+    console.error('OAuth callback error:', error);
+    res.redirect('http://localhost:3000/login?error=InternalServerError');
+  }
+};
+
+export const getMe = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).userId;
+    const user = await User.findByPk(userId, {
+      attributes: { exclude: ['password'] }
+    });
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Get Me error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

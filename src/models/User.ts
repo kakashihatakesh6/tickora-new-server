@@ -14,6 +14,9 @@ interface UserAttributes {
   deletedAt?: Date | null;
   resetPasswordToken?: string | null;
   resetPasswordExpires?: Date | null;
+  googleId?: string | null;
+  githubId?: string | null;
+  profilePicture?: string | null;
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'role' | 'createdAt' | 'updatedAt' | 'deletedAt'> { }
@@ -30,6 +33,9 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
 
   public resetPasswordToken?: string | null;
   public resetPasswordExpires?: Date | null;
+  public googleId?: string | null;
+  public githubId?: string | null;
+  public profilePicture?: string | null;
 }
 
 User.init(
@@ -53,7 +59,7 @@ User.init(
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true // Changed to true for OAuth users
     },
     role: {
       type: DataTypes.STRING,
@@ -66,6 +72,20 @@ User.init(
     },
     resetPasswordExpires: {
       type: DataTypes.DATE,
+      allowNull: true
+    },
+    googleId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true
+    },
+    githubId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true
+    },
+    profilePicture: {
+      type: DataTypes.STRING,
       allowNull: true
     },
     createdAt: {
