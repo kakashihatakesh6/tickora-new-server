@@ -293,17 +293,35 @@ export const getUserBookings = async (req: AuthRequest, res: Response): Promise<
 
       eventDetails = await Model.findByPk(booking.eventId);
 
+      // If it's a movie show, we need to fetch the actual Movie details for title and image
+      let movieDetails: any = null;
+      if (booking.bookingType === 'MOVIE' && eventDetails) {
+        const Movie = require('../models/Movie').default;
+        movieDetails = await Movie.findByPk(eventDetails.movieId);
+      }
+
       if (eventDetails) {
         const ticket = (booking as any).tickets && (booking as any).tickets.length > 0 ? (booking as any).tickets[0] : null;
+
+        // Determine title and image based on type
+        let title = eventDetails.title;
+        let imageUrl = eventDetails.image_url || eventDetails.imageURL; // Handle both cases safely
+
+        if (booking.bookingType === 'MOVIE' && movieDetails) {
+          title = movieDetails.title;
+          imageUrl = movieDetails.image_url;
+        }
+
         transformedBookings.push({
           id: booking.id,
+          booking_type: booking.bookingType,
           event: {
             id: eventDetails.id,
-            title: eventDetails.title,
+            title: title,
             venue: eventDetails.venue,
             city: eventDetails.city,
             date_time: eventDetails.dateTime,
-            image_url: eventDetails.imageURL
+            image_url: imageUrl
           },
           seat_count: booking.seatCount,
           seat_numbers: booking.seatNumbers,
@@ -359,21 +377,38 @@ export const getBookingById = async (req: AuthRequest, res: Response): Promise<v
       return;
     }
 
+    // If it's a movie show, we need to fetch the actual Movie details for title and image
+    let movieDetails: any = null;
+    if (booking.bookingType === 'MOVIE') {
+      const Movie = require('../models/Movie').default;
+      movieDetails = await Movie.findByPk((eventDetails as any).movieId);
+    }
+
     const ticket = (booking as any).tickets && (booking as any).tickets.length > 0 ? (booking as any).tickets[0] : null;
 
     // Helper to get consistent fields
     const getField = (f: string) => (eventDetails as any)[f];
 
+    // Determine title and image based on type
+    let title = eventDetails.title;
+    let imageUrl = (eventDetails as any).image_url || (eventDetails as any).imageURL;
+
+    if (booking.bookingType === 'MOVIE' && movieDetails) {
+      title = movieDetails.title;
+      imageUrl = movieDetails.image_url;
+    }
+
     const transformedBooking = {
       id: booking.id,
+      booking_type: booking.bookingType,
       event: {
         id: eventDetails.id,
-        title: eventDetails.title,
+        title: title,
         venue: eventDetails.venue,
         city: eventDetails.city,
         date_time: eventDetails.dateTime,
-        image_url: eventDetails.imageURL,
-        language: getField('language'),
+        image_url: imageUrl,
+        language: getField('language') || (movieDetails ? movieDetails.language : null),
         format: getField('format'),
         screen_number: getField('screenNumber'),
         ticket_level: 'STANDARD'
