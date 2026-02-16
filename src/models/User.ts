@@ -12,9 +12,11 @@ interface UserAttributes {
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date | null;
+  resetPasswordToken?: string | null;
+  resetPasswordExpires?: Date | null;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'role' | 'createdAt' | 'updatedAt' | 'deletedAt'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'role' | 'createdAt' | 'updatedAt' | 'deletedAt'> { }
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: number;
@@ -25,6 +27,9 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   public readonly deletedAt!: Date | null;
+
+  public resetPasswordToken?: string | null;
+  public resetPasswordExpires?: Date | null;
 }
 
 User.init(
@@ -54,6 +59,14 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: 'user'
+    },
+    resetPasswordToken: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    resetPasswordExpires: {
+      type: DataTypes.DATE,
+      allowNull: true
     },
     createdAt: {
       type: DataTypes.DATE,

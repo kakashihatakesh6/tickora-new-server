@@ -1,7 +1,18 @@
 import { Router } from 'express';
 
 const router = Router();
-import { register, login, registerValidation, loginValidation } from '../controllers/authController';
+import {
+  register,
+  login,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
+  registerValidation,
+  loginValidation,
+  forgotPasswordValidation,
+  verifyOtpValidation,
+  resetPasswordValidation
+} from '../controllers/authController';
 import {
   createBooking,
   verifyPayment,
@@ -19,6 +30,9 @@ import { getMovies, getMovie, getMovieShows, getMovieShow, getSports, getSport, 
 // Auth routes
 router.post('/auth/register', registerValidation, register);
 router.post('/auth/login', loginValidation, login);
+router.post('/auth/forgot-password', forgotPasswordValidation, forgotPassword);
+router.post('/auth/verify-otp', verifyOtpValidation, verifyOtp);
+router.post('/auth/reset-password', resetPasswordValidation, resetPassword);
 
 router.get('/search', searchAll);
 router.get('/movies', getMovies);
