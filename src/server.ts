@@ -12,8 +12,16 @@ const startServer = async () => {
     // Connect to database
     await connectDatabase();
 
-    // Sync models - only sync in dev or if explicitly requested to avoid startup overhead in serverless
+    // Sync models
     if (process.env.NODE_ENV !== 'production' || process.env.DB_SYNC === 'true') {
+      try {
+        // Clean up orphan bookings to prevent foreign key errors during sync
+        await sequelize.query(`DELETE FROM bookings WHERE "userId" NOT IN (SELECT id FROM users)`);
+        console.log('Cleaned up orphan bookings');
+      } catch (err) {
+        console.warn('Cleanup warning (might be first run):', err);
+      }
+
       await sequelize.sync({ alter: true });
       console.log('Database models synchronized');
     }

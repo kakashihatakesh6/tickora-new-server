@@ -3,7 +3,10 @@ import cors from 'cors';
 import session from 'express-session';
 import passport from './config/passport';
 import routes from './routes';
+import adminRoutes from './routes/admin';
 import { loggerMiddleware } from './middleware/logger';
+// Import models index to register all Sequelize associations at startup
+import './models/index';
 
 const app = express();
 
@@ -50,6 +53,7 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/v1', routes); // Adjusted to match frontend expectation /api/v1/auth/register
+app.use('/api/admin', adminRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

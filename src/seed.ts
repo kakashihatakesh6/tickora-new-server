@@ -8,6 +8,7 @@ import { EventType } from './models/Event';
 import User from './models/User';
 import Booking from './models/Booking';
 import Ticket from './models/Ticket';
+import bcrypt from 'bcrypt';
 
 // Load environment variables
 dotenv.config();
@@ -21,6 +22,16 @@ const seedEvents = async () => {
     await sequelize.sync({ force: true });
 
     console.log('🗄️  Database synced successfully\n');
+
+    // ========== CREATE ADMIN USER ==========
+    const hashedPassword = await bcrypt.hash('admin', 10);
+    const adminUser = await User.create({
+      name: 'Admin User',
+      email: 'admin@ticketmaster.com',
+      password: hashedPassword,
+      role: 'admin'
+    });
+    console.log(`👤 Created Admin User: ${adminUser.email}`);
 
     // ========== MOVIES ==========
     const moviesData = [

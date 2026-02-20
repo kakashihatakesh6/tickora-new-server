@@ -6,6 +6,7 @@ import MovieShow from './MovieShow';
 import Sport from './Sport';
 import Booking, { BookingStatus } from './Booking';
 import Ticket from './Ticket';
+import HeroImage from './HeroImage';
 
 // Define Associations
 Movie.hasMany(MovieShow, { foreignKey: 'movieId', as: 'shows' });
@@ -26,5 +27,7 @@ export {
     Sport,
     Booking,
     BookingStatus,
-    Ticket
+    Ticket,
+    HeroImage
 };
+
